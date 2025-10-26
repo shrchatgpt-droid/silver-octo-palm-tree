@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Interactive Pie Dashboard — Finance Reporting</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    /* minimal inline styles for the demo; keep your styles.css if preferred */
+    :root{--bg:#f6f8fb;--card:#ffffff;--accent:#2c7be5;--muted:#666;--shadow:0 6px 18px rgba(29,41,76,0.08)}
+    *{box-sizing:border-box} body{font-family:Inter,system-ui,Arial;margin:0;background:var(--bg);color:#102a43}
+    header{padding:18px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    header h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:12px;align-items:center}
+    .controls select,.controls button{padding:8px 12px;border-radius:6px;border:1px solid #d6dbe8;background:white;cursor:pointer}
+    main{padding:18px;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .panel{background:var(--card);border-radius:10px;padding:14px;box-shadow:var(--shadow)}
+    .chart-row{display:flex;gap:20px;flex-wrap:wrap}
+    .chart-card{display:flex;flex-direction:column;align-items:center}
+    .chart-card h2{margin:6px 0 10px;font-size:16px}
+    canvas{background:transparent}
+    .controls-advanced{display:flex;flex-direction:column;gap:8px;min-width:220px}
+    .filter-list{display:flex;flex-wrap:wrap;gap:8px}
+    .swatch{display:flex;gap:8px;align-items:center;padding:6px 10px;background:var(--card);border-radius:8px;box-shadow:var(--shadow);cursor:pointer}
+    .color{width:14px;height:14px;border-radius:3px}
+    .info-row{display:flex;gap:12px;align-items:center;margin-top:8px}
+    .search-input{padding:8px;border-radius:6px;border:1px solid #d6dbe8;width:100%}
+    footer{padding:14px;text-align:center;color:#75808a;font-size:13px}
+    @media (max-width:900px){main{grid-template-columns:1fr;gap:12px}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Interactive Pie Dashboard — Finance Reporting</h1>
+    <div class="controls">
+      <label>
+        View
+        <select id="datasetSelect">
+          <option value="investment">Investment Platform (4.0 bn)</option>
+          <option value="private">Private (3.0 bn)</option>
+          <option value="public">Public (1.0 bn)</option>
+        </select>
+      </label>
+
+      <button id="resetFiltersBtn">Reset Filters</button>
+      <button id="exportPdfBtn">Export to PDF (High Quality)</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 id="chartA-title">Chart A</h2>
+        <div class="info-row"><div id="chartA-info"></div></div>
+      </div>
+      <div class="chart-card">
+        <canvas id="chartA" width="600" height="360"></canvas>
+      </div>
+      <div style="margin-top:12px">
+        <strong>Filters / Toggle Sectors</strong>
+        <input id="filterSearch" class="search-input" placeholder="Search sectors (type to filter)" />
+        <div id="filterList" class="filter-list" style="margin-top:8px"></div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="toggleAllBtn">Toggle All</button>
+          <button id="showAllBtn">Show All</button>
+          <button id="hideAllBtn">Hide All</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 id="chartB-title">Chart B</h2>
+        <div class="info-row"><div id="chartB-info"></div></div>
+      </div>
+      <div class="chart-card">
+        <canvas id="chartB" width="600" height="360"></canvas>
+      </div>
+      <div style="margin-top:12px">
+        <strong>Legend (click to toggle)</strong>
+        <div id="legend" class="filter-list" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <small>Demo: interactive dashboard with Chart.js, filters, and high-quality PDF export.</small>
+  </footer>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
