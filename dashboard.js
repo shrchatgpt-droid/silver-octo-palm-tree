@@ -1,4 +1,5 @@
-// Demo dashboard logic: Chart.js pie charts (fixed scaled datasets) + interactivity (filters, legend toggles) + export to PDF
+// Demo dashboard logic: Chart.js pie charts (fixed scaled datasets) + interactivity (filters, legend toggles)
+// + accessibility (keyboard toggles, ARIA), persistence, center totals, and export-to-PDF
 (function () {
   // Helpers
   function formatCurrencyMillions(n) {
@@ -79,7 +80,7 @@
     }
   };
 
-  // Slice explode plugin (keeps previous behavior)
+  // Slice explode plugin
   const sliceOffsetPlugin = {
     id: 'sliceOffsetPlugin',
     afterDatasetDraw(chart) {
@@ -118,6 +119,14 @@
     } catch (e) { return null; }
   }
 
+  // Accessibility helpers: set aria attributes on swatch elements
+  function setSwatchA11yAttrs(el, label, isPressed) {
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-pressed', isPressed ? 'true' : 'false');
+    el.setAttribute('aria-label', `${label} filter ${isPressed ? 'on' : 'off'}`);
+  }
+
   function buildFilterControls(labels) {
     filterListDiv.innerHTML = '';
     labels.forEach((label, i) => {
@@ -128,12 +137,26 @@
                       <div class="color" style="background:${COLORS[i % COLORS.length]}"></div>
                       <div style="font-size:13px">${label}</div>`;
       // clicking the swatch toggles the checkbox and filter
-      sw.addEventListener('click', () => {
+      sw.addEventListener('click', (ev) => {
+        // prevent double toggle when clicking nested inputs
+        if (ev.target && ev.target.tagName === 'INPUT') return;
         const cb = sw.querySelector('.filter-checkbox');
         cb.checked = !cb.checked;
         toggleSector(label, cb.checked);
         saveFilters();
       });
+      // keyboard support for accessibility (Enter or Space)
+      sw.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          const cb = sw.querySelector('.filter-checkbox');
+          cb.checked = !cb.checked;
+          toggleSector(label, cb.checked);
+          saveFilters();
+        }
+      });
+      // set initial aria attributes
+      setSwatchA11yAttrs(sw, label, true);
       filterListDiv.appendChild(sw);
     });
   }
@@ -146,6 +169,7 @@
       sw.style.cursor = 'pointer';
       sw.dataset.label = lbl;
       sw.innerHTML = `<div class="color" style="background:${COLORS[i % COLORS.length]}"></div><div style="font-size:13px">${lbl}</div>`;
+      // click to toggle
       sw.addEventListener('click', () => {
         const checkbox = document.querySelector(`.filter-checkbox[data-label="${lbl}"]`);
         const newval = !(checkbox && checkbox.checked);
@@ -153,6 +177,19 @@
         toggleSector(lbl, newval);
         saveFilters();
       });
+      // keyboard support
+      sw.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          const checkbox = document.querySelector(`.filter-checkbox[data-label="${lbl}"]`);
+          const newval = !(checkbox && checkbox.checked);
+          if (checkbox) checkbox.checked = newval;
+          toggleSector(lbl, newval);
+          saveFilters();
+        }
+      });
+      // a11y attrs
+      setSwatchA11yAttrs(sw, lbl, true);
       legendDiv.appendChild(sw);
     });
   }
@@ -171,14 +208,18 @@
       const lbl = cb.dataset.label;
       cb.checked = activeSectors.has(lbl);
     });
-    // highlight swatches for visible ones
+    // highlight swatches for visible ones and update aria-pressed
     document.querySelectorAll('#filterList .swatch').forEach(el => {
       const lbl = el.dataset.label;
-      el.style.opacity = activeSectors.has(lbl) ? '1' : '0.45';
+      const shown = activeSectors.has(lbl);
+      el.style.opacity = shown ? '1' : '0.45';
+      setSwatchA11yAttrs(el, lbl, shown);
     });
     document.querySelectorAll('#legend .swatch').forEach(el => {
       const lbl = el.dataset.label;
-      el.style.opacity = activeSectors.has(lbl) ? '1' : '0.45';
+      const shown = activeSectors.has(lbl);
+      el.style.opacity = shown ? '1' : '0.45';
+      setSwatchA11yAttrs(el, lbl, shown);
     });
   }
 
