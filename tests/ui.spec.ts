@@ -16,9 +16,6 @@ test('dashboard renders and filtering works', async ({ page }) => {
   const techSwatch = page.locator('#filterList .swatch', { hasText: 'Technology' }).first();
   await expect(techSwatch).toBeVisible();
 
-  // Read initial aria-pressed
-  const initialPressed = await techSwatch.getAttribute('aria-pressed');
-
   // Click swatch to toggle off
   await techSwatch.click();
 
